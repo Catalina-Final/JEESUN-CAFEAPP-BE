@@ -5,7 +5,8 @@ const {
 } = require("../helpers/utils.helper");
 const User = require("../models/user");
 const Shop = require("../models/shop");
-
+const Event = require("../models/event");
+const Review = require("../models/review");
 const adminController = {};
 
 adminController.createNewShop = catchAsync(async (req, res, next) => {
@@ -73,6 +74,81 @@ adminController.deleteSingleShop = catchAsync(async (req, res, next) => {
   if (!shop)
     return next(new AppError(401, "Shop not found or User not authorized"));
   return sendResponse(res, 200, true, null, null, "Shop deleted");
+});
+
+adminController.createNewEvent = catchAsync(async function (req, res, next) {
+  const owner = await User.findOne({
+    _id: req.body.owner,
+    role: "owner",
+  });
+  if (!owner) {
+    return next(new AppError(401, "User is not the owner"));
+  }
+  const allows = ["images", "title", "description", "date", "coords"];
+
+  for (let key in req.body) {
+    if (!allows.includes(key)) {
+      delete req.body[key];
+    }
+    if (key === "coords") {
+      req.body.coords = { type: "Point", coordinates: req.body.coords };
+    }
+  }
+
+  const event = await Event.create({
+    ...req.body,
+    owner: owner._id,
+  });
+  return sendResponse(res, 200, true, event, null, "A new event created");
+});
+
+adminController.updateSingleEvent = catchAsync(async (req, res, next) => {
+  const owner = await User.findOne({
+    _id: req.body.owner,
+    role: "owner",
+  });
+  if (!owner) {
+    return next(new AppError(401, "User is not the owner"));
+  }
+  const eventId = req.params.id;
+  const { title } = req.body;
+
+  const event = await Event.findOneAndUpdate(
+    { _id: eventId },
+    { title },
+    { new: true }
+  );
+  if (!event) return next(new AppError(401, "Event not found"));
+  return sendResponse(res, 200, true, event, null, "Event updated");
+});
+
+adminController.deleteSingleEvent = catchAsync(async (req, res, next) => {
+  const owner = await User.findOne({
+    _id: req.body.owner,
+    role: "owner",
+  });
+  if (!owner) {
+    return next(new AppError(401, "User is not the owner"));
+  }
+  const eventId = req.params.id;
+
+  const event = await Event.findByIdAndUpdate(
+    { _id: eventId },
+    { isDeleted: true },
+    { new: true }
+  );
+  if (!event) return next(new AppError(401, "Event not found"));
+  return sendResponse(res, 200, true, null, null, "Event deleted");
+});
+
+adminController.deleteSingleReview = catchAsync(async (req, res, next) => {
+  const reviewId = req.params.id;
+
+  const review = await Review.findOneAndDelete({
+    _id: reviewId,
+  });
+  if (!review) return next(new AppError(401, "Review not found"));
+  return sendResponse(res, 200, true, null, null, "Review deleted");
 });
 
 module.exports = adminController;

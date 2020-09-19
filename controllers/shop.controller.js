@@ -4,6 +4,8 @@ const {
   sendResponse,
 } = require("../helpers/utils.helper");
 const Shop = require("../models/shop");
+const User = require("../models/user");
+const mongoose = require("mongoose");
 const shopController = {};
 
 shopController.getShops = catchAsync(async (req, res, next) => {
@@ -39,10 +41,10 @@ shopController.getSingleShop = catchAsync(async (req, res, next) => {
 
 // Owner only
 shopController.createNewShop = catchAsync(async function (req, res, next) {
-  const owner = req.userId; ////// const owner = req.userId
+  const owner = req.userId;
   console.log(owner);
 
-  const allows = ["name", "address", "phone", "tags", "coords"];
+  const allows = ["name", "address", "phone", "tags", "coords", "images"];
 
   for (let key in req.body) {
     if (!allows.includes(key)) {
@@ -90,6 +92,56 @@ shopController.deleteSingleShop = catchAsync(async (req, res, next) => {
   if (!shop)
     return next(new AppError(401, "Shop not found or User not authorized"));
   return sendResponse(res, 200, true, null, null, "Shop deleted");
+});
+
+shopController.favoriteShop = catchAsync(async (req, res, next) => {
+  console.log(req.params.id);
+  const check = await User.findOne({
+    _id: req.userId,
+    favorites: req.params.id,
+  });
+  let user;
+  if (!check) {
+    console.log("like");
+    user = await User.findByIdAndUpdate(
+      req.userId,
+      {
+        $addToSet: { favorites: req.params.id },
+      },
+      { new: true }
+    );
+  } else {
+    console.log("unlike");
+    user = await User.findByIdAndUpdate(
+      req.userId,
+      {
+        $pull: { favorites: req.params.id },
+      },
+      { new: true }
+    );
+  }
+  const foo = await User.find({
+    favorites: req.params.id,
+  }).countDocuments();
+  const shop = await Shop.findByIdAndUpdate(
+    req.params.id,
+    {
+      favoriteUserCount: foo,
+    },
+    {
+      new: true,
+    }
+  );
+
+  return sendResponse(
+    res,
+    200,
+    true,
+    { shop, user },
+    null,
+    "favorite list updated successfully"
+  );
+  // update user with favoties array
 });
 
 module.exports = shopController;

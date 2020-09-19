@@ -1,20 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const shopController = require("../controllers/shop.controller");
+const eventController = require("../controllers/event.controller");
 const validators = require("../middlewares/validators");
 const authMiddleware = require("../middlewares/authentication");
 const { body, param } = require("express-validator");
 
 /**
- * @route GET api/shops?page=1&limit=10
- * @description Get Shops with pagination
+ * @route GET api/events
+ * @description Get events in calender
  * @access Public
  */
-router.get("/", shopController.getShops);
+router.get("/", eventController.getEvents);
 
 /**
- * @route GET api/shops/:id
- * @description Get a single shop
+ * @route GET api/events/:id
+ * @description Get a single event
  * @access Public
  */
 router.get(
@@ -22,25 +22,25 @@ router.get(
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
-  shopController.getSingleShop
+  eventController.getSingleEvent
 );
 
 /**
- * @route POST api/shops
- * @description Create a new shop
+ * @route POST api/events
+ * @description Create a new event
  * @access Login required, Owner Required
  */
 router.post(
   "/",
   authMiddleware.loginRequired,
   authMiddleware.ownerRequired,
-  validators.validate([body("name", "Missing name").exists().notEmpty()]),
-  shopController.createNewShop
+  validators.validate([body("title", "Missing title").exists().notEmpty()]),
+  eventController.createNewEvent
 );
 
 /**
- * @route PUT api/shops/:id
- * @description Update s shop
+ * @route PUT api/events/:id
+ * @description Update an event
  * @access Login required, Owner Required
  */
 router.put(
@@ -49,15 +49,15 @@ router.put(
   authMiddleware.ownerRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
-    body("name", "Missing name").exists().notEmpty(),
-    body("owner", "Missing owner").exists().notEmpty(),
+    body("title", "Missing title").exists().notEmpty(),
+    // body("owner", "Missing owner").exists().notEmpty(),
   ]),
-  shopController.updateSingleShop
+  eventController.updateSingleEvent
 );
 
 /**
- * @route DELETE api/shops/:id
- * @description Delete a single shop
+ * @route DELETE api/events/:id
+ * @description Delete a single event
  * @access Login required, Owner Required
  */
 router.delete(
@@ -67,21 +67,21 @@ router.delete(
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
-  shopController.deleteSingleShop
+  eventController.deleteSingleEvent
 );
 
 /**
- * @route POST api/shops/favorite/:id
- * @description Save, remove favorite list
+ * @route POST api/events/interested/:id
+ * @description Save, remove intersted list
  * @access Login required
  */
 router.post(
-  "/favorite/:id",
+  "/interested/:id",
   authMiddleware.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
-  shopController.favoriteShop
+  eventController.interestedEvent
 );
 
 module.exports = router;

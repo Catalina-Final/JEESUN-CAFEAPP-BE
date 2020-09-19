@@ -13,6 +13,11 @@ const userSchema = Schema({
     enum: ["customer", "owner", "admin"],
     default: "customer",
   },
+  favorites: [{ type: Schema.ObjectId, required: true, ref: "Shop" }],
+  favoriteCount: { type: Number, default: 0 },
+
+  interested: [{ type: Schema.ObjectId, required: true, ref: "Event" }],
+
   isDeleted: { type: Boolean, default: false },
 });
 
@@ -32,4 +37,5 @@ userSchema.pre("save", async function (next) {
   }
   next();
 });
+
 module.exports = mongoose.model("User", userSchema);

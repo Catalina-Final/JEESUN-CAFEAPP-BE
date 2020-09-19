@@ -8,14 +8,14 @@ utilsHelper.sendResponse = (
   status,
   success,
   data,
-  error,
+  errors,
   message,
   token
 ) => {
   const response = {};
   if (success) response.success = success;
   if (data) response.data = data;
-  if (error) response.error = { message: error.message };
+  if (errors) response.errors = errors;
   if (message) response.message = message;
   // if (token) response.token = token;
   return res.status(status).json(response);

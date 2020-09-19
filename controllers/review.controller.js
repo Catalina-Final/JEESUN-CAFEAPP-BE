@@ -1,6 +1,5 @@
 const utilsHelper = require("../helpers/utils.helper");
 const Review = require("../models/review");
-const review = require("../models/review");
 const { catchAsync, AppError, sendResponse } = utilsHelper;
 const reviewController = {};
 
