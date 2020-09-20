@@ -5,6 +5,7 @@ const {
 } = require("../helpers/utils.helper");
 const Shop = require("../models/shop");
 const User = require("../models/user");
+const Review = require("../models/review");
 const mongoose = require("mongoose");
 const shopController = {};
 
@@ -25,8 +26,11 @@ shopController.getShops = catchAsync(async (req, res, next) => {
     sortBy.createdAt = "desc";
   }
 
-  const shops = await Shop.find(filter).sort(sortBy).skip(offset).limit(limit);
-  // .populate("owner");
+  const shops = await Shop.find(filter)
+    .sort(sortBy)
+    .skip(offset)
+    .limit(limit)
+    .populate("owner");
 
   return sendResponse(res, 200, true, { shops, totalPages }, null, "");
 });
@@ -35,7 +39,8 @@ shopController.getSingleShop = catchAsync(async (req, res, next) => {
   const shop = await Shop.findById(req.params.id).populate("owner");
 
   if (!shop) return next(new AppError(401, "Shop not found"));
-
+  shop = shop.toJSON();
+  shop.reviews = await Review.find({ shop: shop._id }).populate("reviewer");
   return sendResponse(res, 200, true, shop, null, null);
 });
 

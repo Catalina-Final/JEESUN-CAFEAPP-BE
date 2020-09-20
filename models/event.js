@@ -8,6 +8,11 @@ const eventSchema = Schema(
       required: true,
       ref: "User",
     },
+    shop: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Shop",
+    },
     images: [String],
     title: { type: String, required: true },
     description: { type: String, required: true },
