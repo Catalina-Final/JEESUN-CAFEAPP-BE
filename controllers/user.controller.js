@@ -5,6 +5,7 @@ const {
 } = require("../helpers/utils.helper");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const Shop = require("../models/shop");
 const userController = {};
 
 userController.register = catchAsync(async (req, res, next) => {
@@ -31,7 +32,9 @@ userController.register = catchAsync(async (req, res, next) => {
 
 userController.getCurrentUser = catchAsync(async (req, res, next) => {
   const userId = req.userId;
-  const user = await User.findById(userId);
+  let user = await User.findById(userId);
+  user = user.toJSON();
+  user.shops = await Shop.find({ owner: userId });
   return sendResponse(
     res,
     200,

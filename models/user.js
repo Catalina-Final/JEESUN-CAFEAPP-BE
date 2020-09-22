@@ -4,21 +4,33 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
 
-const userSchema = Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String },
-  role: {
-    type: String,
-    enum: ["customer", "owner", "admin"],
-    default: "customer",
+const userSchema = Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String },
+    role: {
+      type: String,
+      enum: ["customer", "owner", "admin"],
+      default: "customer",
+    },
+    favorites: [{ type: Schema.ObjectId, required: true, ref: "Shop" }],
+    favoriteCount: { type: Number, default: 0 },
+
+    interested: [{ type: Schema.ObjectId, required: true, ref: "Event" }],
+
+    isDeleted: { type: Boolean, default: false },
   },
-  favorites: [{ type: Schema.ObjectId, required: true, ref: "Shop" }],
-  favoriteCount: { type: Number, default: 0 },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 
-  interested: [{ type: Schema.ObjectId, required: true, ref: "Event" }],
-
-  isDeleted: { type: Boolean, default: false },
+userSchema.virtual("shops", {
+  ref: "Shop",
+  localField: "_id",
+  foreignField: "owner",
 });
 
 userSchema.plugin(require("./plugins/isDeletedFalse"));

@@ -13,17 +13,13 @@ router.use("/users", userApi);
 const shopApi = require("./shopApi");
 router.use("/shops", shopApi);
 
-// reviewApi
-const reviewApi = require("./reviewApi");
-router.use("/reviews", reviewApi);
-
 // adminApi
 const adminApi = require("./adminApi");
 router.use("/admin", adminApi);
 
-// ratingApi
-const ratingApi = require("./ratingApi");
-router.use("/ratings", ratingApi);
+// // ratingApi
+// const ratingApi = require("./ratingApi");
+// router.use("/ratings", ratingApi);
 
 // eventApi
 const eventApi = require("./eventApi");

@@ -9,7 +9,19 @@ const Review = require("../models/review");
 const mongoose = require("mongoose");
 const shopController = {};
 
+// 106.707818,
+// 10.7619779
+// ?queryField=coords&distance=10&latlng=106.707818,10.7619779&unit=mi
 shopController.getShops = catchAsync(async (req, res, next) => {
+  let { queryField, distance, latlng, unit } = req.query;
+  let [lat, lng] = [0, 0];
+  let radius;
+  if ((queryField, distance, latlng, unit)) {
+    [lat, lng] = latlng.split(",");
+    radius = unit === "mi" ? distance / 3963.2 : distance / 6378.1;
+  }
+
+  console.log(queryField, distance, latlng, unit);
   let filter = { ...req.query };
   delete filter.limit;
   delete filter.page;
@@ -17,7 +29,17 @@ shopController.getShops = catchAsync(async (req, res, next) => {
 
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  const totalShops = await Shop.find(filter).countDocuments;
+  let totalShops;
+  if (queryField) {
+    totalShops = await Shop.find({
+      coords: {
+        $geoWithin: { $centerSphere: [[lng, lat], radius] },
+      },
+    }).countDocuments();
+  } else {
+    totalShops = await Shop.find(filter).countDocuments();
+  }
+
   const totalPages = Math.ceil(totalShops / limit);
   const offset = limit * (page - 1);
 
@@ -26,17 +48,30 @@ shopController.getShops = catchAsync(async (req, res, next) => {
     sortBy.createdAt = "desc";
   }
 
-  const shops = await Shop.find(filter)
-    .sort(sortBy)
-    .skip(offset)
-    .limit(limit)
-    .populate("owner");
+  let shops;
+  if (queryField) {
+    shops = await Shop.find({
+      coords: {
+        $geoWithin: { $centerSphere: [[lng, lat], radius] },
+      },
+    })
+      .sort(sortBy)
+      .skip(offset)
+      .limit(limit)
+      .populate("owner");
+  } else {
+    shops = await Shop.find(filter)
+      .sort(sortBy)
+      .skip(offset)
+      .limit(limit)
+      .populate("owner");
+  }
 
   return sendResponse(res, 200, true, { shops, totalPages }, null, "");
 });
 
 shopController.getSingleShop = catchAsync(async (req, res, next) => {
-  const shop = await Shop.findById(req.params.id).populate("owner");
+  let shop = await Shop.findById(req.params.id).populate("owner");
 
   if (!shop) return next(new AppError(401, "Shop not found"));
   shop = shop.toJSON();
@@ -49,7 +84,17 @@ shopController.createNewShop = catchAsync(async function (req, res, next) {
   const owner = req.userId;
   console.log(owner);
 
-  const allows = ["name", "address", "phone", "tags", "coords", "images"];
+  const allows = [
+    "name",
+    "address",
+    "phone",
+    "tags",
+    "coords",
+    "images",
+    "openHour",
+    "closeHour",
+    "district",
+  ];
 
   for (let key in req.body) {
     if (!allows.includes(key)) {
@@ -61,20 +106,49 @@ shopController.createNewShop = catchAsync(async function (req, res, next) {
   }
   const shop = await Shop.create({
     ...req.body,
+    sortName: req.body.name,
     owner,
   });
   return sendResponse(res, 200, true, shop, null, "A new shop created");
+});
+
+shopController.getMyShops = catchAsync(async (req, res, next) => {
+  console.log("hahahahhahahahah");
+  const owner = req.userId;
+  const shops = await Shop.find({ owner });
+  return sendResponse(res, 200, true, shops, null, "Here are your shops");
 });
 
 // Owner only
 shopController.updateSingleShop = catchAsync(async (req, res, next) => {
   const owner = req.userId;
   const shopId = req.params.id;
-  const { name } = req.body;
+  const allows = [
+    "name",
+    "address",
+    "phone",
+    "tags",
+    "coords",
+    "images",
+    "openHour",
+    "closeHour",
+    "district",
+  ];
+
+  for (let key in req.body) {
+    if (!allows.includes(key)) {
+      delete req.body[key];
+    }
+    if (key === "coords") {
+      req.body.coords = { type: "Point", coordinates: req.body.coords };
+    }
+  }
 
   const shop = await Shop.findOneAndUpdate(
     { _id: shopId, owner: owner },
-    { name },
+    {
+      ...req.body,
+    },
     { new: true }
   );
   if (!shop)

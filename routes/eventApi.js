@@ -50,7 +50,7 @@ router.put(
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
     body("title", "Missing title").exists().notEmpty(),
-    // body("owner", "Missing owner").exists().notEmpty(),
+    body("owner", "Missing owner").exists().notEmpty(),
   ]),
   eventController.updateSingleEvent
 );
@@ -71,12 +71,12 @@ router.delete(
 );
 
 /**
- * @route POST api/events/interested/:id
+ * @route POST api/events/:id/interest
  * @description Save, remove intersted list
  * @access Login required
  */
-router.post(
-  "/interested/:id",
+router.put(
+  "/:id/interest",
   authMiddleware.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),

@@ -16,13 +16,15 @@ const eventSchema = Schema(
     images: [String],
     title: { type: String, required: true },
     description: { type: String, required: true },
-    date: { type: Number, required: false },
-    time: { type: Number, required: false }, // time ?
-    startHour: { type: String, required: true, default: "10am" }, // undefault later
-    endHour: { type: String, required: true, default: "6pm" }, // undefault later
+    date: { type: String, required: false },
+    // time: { type: Number, required: false }, // time ?
+    startHour: { type: String, required: true }, // undefault later
+    endHour: { type: String, required: true }, // undefault later
+    start: { type: Date, required: true }, // undefault later
+    end: { type: Date, required: true }, // undefault later
 
     interestedCount: { type: Number, default: 0 },
-    // interested: { type: Number, default: 0 },
+    interested: { type: Number, default: 0 },
 
     phone: { type: String, required: true, default: "84-777-808-430" }, // undefault later
     coords: {

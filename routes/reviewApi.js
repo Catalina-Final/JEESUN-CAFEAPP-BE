@@ -1,17 +1,17 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const reviewController = require("../controllers/review.controller");
 const validators = require("../middlewares/validators");
 const authMiddleware = require("../middlewares/authentication");
 const { body, param } = require("express-validator");
 
 /**
- * @route POST api/reviews/shops/:id
+ * @route POST api/shops/:id/reviews
  * @description Create a new review for a shop
  * @access Login required
  * */
 router.post(
-  "/shops/:id",
+  "/",
   authMiddleware.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
@@ -22,12 +22,12 @@ router.post(
 );
 
 /**
- * @route GET api/reviews/shops/:id?page=1&limit=10
+ * @route GET api/shops/:id/reviews?page=1&limit=10
  * @description Get reviews of a shop with a pagination
  * @access Public
  */
 router.get(
-  "/shops/:id",
+  "/",
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
@@ -35,15 +35,15 @@ router.get(
 );
 
 /**
- * @route PUT api/reviews/:id
+ * @route PUT api/shops/:id/reviews/:id
  * @description Update a review
  * @access Login required
  */
 router.put(
-  "/:id",
+  "/:rid",
   authMiddleware.loginRequired,
   validators.validate([
-    param("id").exists().isString().custom(validators.checkObjectId),
+    param("rid").exists().isString().custom(validators.checkObjectId),
     body("content", "Missing content").exists().notEmpty(),
     body("rating", "Missing rating").exists().notEmpty(),
   ]),
@@ -51,15 +51,15 @@ router.put(
 );
 
 /**
- * @route DELETE api/reviews/:id
+ * @route DELETE api/shops/:id/reviews/:rid
  * @description Delete a review
  * @access Login required
  */
 router.delete(
-  "/:id",
+  "/:rid",
   authMiddleware.loginRequired,
   validators.validate([
-    param("id").exists().isString().custom(validators.checkObjectId),
+    param("rid").exists().isString().custom(validators.checkObjectId),
   ]),
   reviewController.deleteSingleReview
 );

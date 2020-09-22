@@ -1,12 +1,13 @@
 const utilsHelper = require("../helpers/utils.helper");
 const { catchAsync, AppError, sendResponse } = utilsHelper;
 const User = require("../models/user");
+const Shop = require("../models/shop");
 const bcrypt = require("bcryptjs");
 const authController = {};
 
 authController.loginWithEmail = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email }, "+password");
+  let user = await User.findOne({ email }, "+password");
   if (!user)
     return next(new AppError(400, "Invalid credentials", "Login Error"));
 
@@ -18,6 +19,8 @@ authController.loginWithEmail = catchAsync(async (req, res, next) => {
   if (!isMatch) return next(new AppError(400, "Wrong password", "Login Error"));
 
   accessToken = await user.generateToken();
+  user = user.toJSON();
+  user.shops = await Shop.find({ owner: user._id });
   return sendResponse(
     res,
     200,
@@ -64,6 +67,8 @@ authController.loginWithFacebookOrGoogle = catchAsync(
     }
 
     const accessToken = await user.generateToken();
+    user = user.toJSON();
+    user.shops = await Shop.find({ owner: user._id });
     return sendResponse(
       res,
       200,

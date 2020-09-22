@@ -13,6 +13,13 @@ const { body, param } = require("express-validator");
 router.get("/", shopController.getShops);
 
 /**
+ * @route GET api/shops/me
+ * @description Get my shops
+ * @access login required
+ */
+router.get("/me", authMiddleware.loginRequired, shopController.getMyShops);
+
+/**
  * @route GET api/shops/:id
  * @description Get a single shop
  * @access Public
@@ -76,12 +83,16 @@ router.delete(
  * @access Login required
  */
 router.post(
-  "/favorite/:id",
+  "/:id/favorite",
   authMiddleware.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
   shopController.favoriteShop
 );
+
+// reviewApi
+const reviewApi = require("./reviewApi");
+router.use("/:id/reviews", reviewApi);
 
 module.exports = router;
