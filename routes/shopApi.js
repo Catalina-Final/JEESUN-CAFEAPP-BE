@@ -78,7 +78,7 @@ router.delete(
 );
 
 /**
- * @route POST api/shops/favorite/:id
+ * @route POST api/shops/:id/favorite
  * @description Save, remove favorite list
  * @access Login required
  */

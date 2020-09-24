@@ -32,6 +32,7 @@ shopController.getShops = catchAsync(async (req, res, next) => {
   let totalShops;
   if (queryField) {
     totalShops = await Shop.find({
+      ...filter,
       coords: {
         $geoWithin: { $centerSphere: [[lng, lat], radius] },
       },
@@ -51,6 +52,7 @@ shopController.getShops = catchAsync(async (req, res, next) => {
   let shops;
   if (queryField) {
     shops = await Shop.find({
+      ...filter,
       coords: {
         $geoWithin: { $centerSphere: [[lng, lat], radius] },
       },
