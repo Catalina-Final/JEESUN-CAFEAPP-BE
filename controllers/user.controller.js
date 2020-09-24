@@ -32,7 +32,7 @@ userController.register = catchAsync(async (req, res, next) => {
 
 userController.getCurrentUser = catchAsync(async (req, res, next) => {
   const userId = req.userId;
-  let user = await User.findById(userId);
+  let user = await User.findById(userId).populate("favorites");
   user = user.toJSON();
   user.shops = await Shop.find({ owner: userId });
   return sendResponse(
