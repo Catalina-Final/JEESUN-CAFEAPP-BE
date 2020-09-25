@@ -14,7 +14,8 @@ reviewController.createNewReview = catchAsync(async (req, res, next) => {
     content,
     rating,
   });
-
+  await Review.populate(review, { path: "reviewer" });
+  console.log(review);
   return sendResponse(
     res,
     200,
