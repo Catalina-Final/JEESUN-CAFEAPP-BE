@@ -12,7 +12,7 @@ const userSchema = Schema(
     role: {
       type: String,
       enum: ["customer", "owner", "admin"],
-      default: "customer",
+      default: "owner",
     },
     favorites: [{ type: Schema.ObjectId, required: true, ref: "Shop" }],
     favoriteCount: { type: Number, default: 0 },
