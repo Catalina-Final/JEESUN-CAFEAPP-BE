@@ -213,6 +213,7 @@ shopController.favoriteShop = catchAsync(async (req, res, next) => {
       new: true,
     }
   );
+  await User.populate(user, { path: "favorites" });
 
   return sendResponse(
     res,
