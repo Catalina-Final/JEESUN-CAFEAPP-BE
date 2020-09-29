@@ -51,7 +51,7 @@ shopController.getShops = catchAsync(async (req, res, next) => {
   }
 
   let shops;
-  if (queryField) {
+  if (distance) {
     shops = await Shop.find({
       ...filter,
       coords: {

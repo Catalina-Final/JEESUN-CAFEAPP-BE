@@ -28,7 +28,7 @@ const shopSchema = Schema(
         required: true,
       },
       coordinates: {
-        type: [Number], // [lat,lng]
+        type: [Number], // [lng,lat]
         required: true,
       },
     },
