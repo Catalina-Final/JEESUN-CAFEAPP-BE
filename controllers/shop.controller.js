@@ -13,24 +13,25 @@ const shopController = {};
 // 10.7619779
 // ?queryField=coords&distance=10&latlng=106.707818,10.7619779&unit=mi
 shopController.getShops = catchAsync(async (req, res, next) => {
-  let { queryField, distance, latlng, unit } = req.query;
+  let { queryField, distance, latlng } = req.query;
   let [lat, lng] = [0, 0];
   let radius;
-  if ((queryField, distance, latlng, unit)) {
+  if ((distance, latlng)) {
     [lat, lng] = latlng.split(",");
-    radius = unit === "mi" ? distance / 3963.2 : distance / 6378.1;
+    radius = distance / 6378.1;
   }
 
-  console.log(queryField, distance, latlng, unit);
   let filter = { ...req.query };
   delete filter.limit;
   delete filter.page;
   delete filter.sortBy;
+  delete filter.distance;
+  delete filter.latlng;
 
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   let totalShops;
-  if (queryField) {
+  if (distance) {
     totalShops = await Shop.find({
       ...filter,
       coords: {
